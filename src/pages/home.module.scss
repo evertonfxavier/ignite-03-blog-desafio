@@ -1,1 +1,81 @@
-// TODO
+.Wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  width: inherit;
+  height: inherit;
+  margin: 0 auto;
+  padding: 80px 0;
+
+}
+
+.Content {
+  max-width: 700px;
+  width: 100%;
+  height: auto;
+  padding-bottom: 4rem;
+
+   button {
+    font-weight: 600;
+    color: var(--highlight);
+    border: 0;
+    background: none;
+
+    transition: filter 0.2s;
+
+    &:hover {
+      filter: brightness(0.8);
+    }
+  }
+}
+
+.postsContainer {
+  margin: 70px 0 64px;
+  width: 100%;
+  a + a {
+    margin-top: 48px;
+  }
+}
+
+.postContent {
+  display: block;
+
+  header {
+    h1 {
+      font-size: 1.75rem;
+      color: var(--heading);
+    }
+
+    p{
+      text-align: justify;
+      font-size: 1.125rem;
+      color: var(--body);
+      line-height: 1.375rem;
+      margin: 0.5rem 0 1.5rem;
+    }
+  }
+
+  transition: filter 0.2s;
+
+  &:hover {
+    filter: brightness(0.9);
+  }
+
+  footer {
+    display: flex;
+    justify-self: center;
+    align-items: center;
+
+    div {
+      svg {
+        color: var(--info);
+        margin-right: 0.5rem;
+      }
+    }
+
+    div + div {
+      margin-left: 1.5rem;
+    }
+  }
+}

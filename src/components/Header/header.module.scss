@@ -1,1 +1,20 @@
-// TODO
+.Container{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+  
+    margin: 0 auto;
+  }
+  
+  .ContentHeader {
+    display: flex;
+    align-items: center;
+    max-width: 1120px;
+    width: 100%;
+    height: 6.5rem;
+  
+    img {
+      margin-left: 200px;
+    }
+  }
