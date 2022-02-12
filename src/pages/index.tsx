@@ -14,7 +14,7 @@ import styles from "./home.module.scss";
 import { RichText } from "prismic-dom";
 
 interface Post {
-  uid?: string;
+  slug?: string;
   first_publication_date: string | null;
   data: {
     title: string;
@@ -41,8 +41,6 @@ export default function Home({ postsPagination }: HomeProps): ReactNode {
     return formatedPosts;
   });
 
-  console.log(posts);
-
   const handleFetchNewPagePosts = useCallback(() => {
     fetch(next_page)
       .then((response) => response.json())
@@ -54,7 +52,7 @@ export default function Home({ postsPagination }: HomeProps): ReactNode {
             data: { title: string; subtitle: any[]; author: string };
           }) => {
             const formatedResult = {
-              uid: result.uid,
+              slug: result.uid,
               first_publication_date: format(
                 parseISO(result.first_publication_date),
                 "d MMM yyy",
@@ -89,7 +87,7 @@ export default function Home({ postsPagination }: HomeProps): ReactNode {
 
             <div className={styles.postsContainer}>
               {posts.map((post) => (
-                <Link key={post.uid} href={`/post/${post.uid}`}>
+                <Link key={post.slug} href={`/post/${post.slug}`}>
                   <a className={styles.postContent}>
                     <header>
                       <h1>{post.data.title}</h1>
@@ -135,7 +133,7 @@ export const getStaticProps: GetStaticProps = async () => {
 
   const results = postsResponse.results.map((post) => {
     return {
-      uid: post.uid,
+      slug: post.uid,
       first_publication_date: format(
         parseISO(post.first_publication_date),
         "d MMM yyy",
