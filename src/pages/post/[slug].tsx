@@ -1,7 +1,14 @@
-import { ReactNode, Fragment } from "react";
+import {
+  ReactNode,
+  Fragment,
+  Key,
+  ReactChild,
+  ReactFragment,
+  ReactPortal,
+} from "react";
 import Head from "next/head";
 import { useRouter } from "next/router";
-import { GetStaticPaths, GetStaticProps } from "next";
+import { GetServerSideProps, GetStaticPaths, GetStaticProps } from "next";
 import Prismic from "@prismicio/client";
 import { RichText } from "prismic-dom";
 import { format, parseISO } from "date-fns";
@@ -25,35 +32,17 @@ interface Post {
       url: string;
     };
     author: string;
-    content: {
-      heading: string;
-      body: {
-        text: string;
-      }[];
-    }[];
+    contents: Array<any>;
   };
 }
 
 interface PostProps {
   post: Post;
+  // contents: any;
 }
 
-export default function Post({ post }: PostProps): ReactNode {
+export default function Post({ post }: PostProps) {
   const { isFallback } = useRouter();
-  const datePost = format(parseISO(post.first_publication_date), "d MMM yyy", {
-    locale: ptBR,
-  });
-
-  const formattedPost = {
-    ...post,
-    data: {
-      ...post.data,
-      content: post.data.content.map((c) => ({
-        ...c,
-        body: RichText.asHtml(c.body),
-      })),
-    },
-  };
 
   return (
     <>
@@ -72,7 +61,7 @@ export default function Post({ post }: PostProps): ReactNode {
               <article className={styles.PostTitle}>
                 <div>
                   <FiCalendar />
-                  <time>{datePost}</time>
+                  <time>{post.first_publication_date}</time>
                 </div>
                 <div>
                   <FiUser />
@@ -84,8 +73,8 @@ export default function Post({ post }: PostProps): ReactNode {
                 </div>
               </article>
               <section>
-                {formattedPost.data.content.map((c) => (
-                  <Fragment key={c.heading}>
+                {post.data.contents.map((c: any, idx: Key) => (
+                  <Fragment key={idx}>
                     <h2>{c.heading}</h2>
                     <div dangerouslySetInnerHTML={{ __html: c.body }} />
                   </Fragment>
@@ -102,7 +91,7 @@ export default function Post({ post }: PostProps): ReactNode {
 export const getStaticPaths: GetStaticPaths = async () => {
   const prismic = getPrismicClient();
   const posts = await prismic.query([
-    Prismic.predicates.at("document.type", "posts"),
+    Prismic.predicates.at("document.type", "post"),
   ]);
 
   const paths = posts.results.map((post) => ({
@@ -115,34 +104,38 @@ export const getStaticPaths: GetStaticPaths = async () => {
   };
 };
 
-export const getStaticProps: GetStaticProps = async (context) => {
-  const { slug } = context.params;
+export const getStaticProps: GetStaticProps = async ({ params }) => {
+  const { slug } = params;
 
   const prismic = getPrismicClient();
   const response = await prismic.getByUID("posts", String(slug), {});
 
   const post = {
     uid: response.uid,
-    first_publication_date: response.first_publication_date,
+    first_publication_date: format(
+      parseISO(response.first_publication_date),
+      "d MMM yyy",
+      { locale: ptBR }
+    ),
     data: {
-      title: response.data.title,
-      author: response.data.author,
-      subtitle: response.data.subtitle,
+      title: RichText.asText(response.data.title),
+      author: RichText.asText(response.data.author),
+      subtitle: RichText.asText(response.data.subtitle),
       banner: {
         url: response.data.banner.url,
       },
-      content: response.data.content.map((c) => ({
-        heading: c.heading,
-        body: c.body.map((b) => ({
-          ...b,
-        })),
-      })),
+      contents: response.data.content.map(
+        (item: { heading: string; body: string }) => {
+          return {
+            heading: RichText.asText(item.heading),
+            body: RichText.asHtml(item.body),
+          };
+        }
+      ),
     },
   };
 
   return {
-    props: {
-      post,
-    },
+    props: { post },
   };
 };
