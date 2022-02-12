@@ -118,9 +118,9 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
       { locale: ptBR }
     ),
     data: {
-      title: RichText.asText(response.data.title),
-      author: RichText.asText(response.data.author),
-      subtitle: RichText.asText(response.data.subtitle),
+      title: response.data.title,
+      author: response.data.author,
+      subtitle: response.data.subtitle,
       banner: {
         url: response.data.banner.url,
       },
