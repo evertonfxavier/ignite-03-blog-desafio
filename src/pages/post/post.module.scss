@@ -1,1 +1,51 @@
-// TODO
+.PostContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 0 auto;
+  
+    img {
+      width: 100%;
+      height: 400px;
+      object-fit: cover;
+    }
+  }
+  
+  .PostContent {
+    max-width: 720px;
+    width: 100%;
+    margin-bottom: 80px;
+  
+    h1 {
+      font-size: 48px;
+      line-height: 58px;
+      margin-top: 80px;
+      letter-spacing: -0.5px;
+      font-weight: bold;
+      color: var(--heading);
+    }
+  }
+  
+  .PostTitle {
+    display: flex;
+    margin: 14px 0 64px;
+  
+    div {
+      display: flex;
+      justify-content: baseline;
+  
+      svg {
+        margin-right: 8px;
+        color: var(--info);
+      }
+  
+      time, span {
+        color: var(--info);
+      }
+  
+    }
+  
+    div + div {
+      margin-left: 24px;
+    }
+  }

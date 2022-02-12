@@ -11,6 +11,7 @@ import { getPrismicClient } from "../services/prismic";
 
 import commonStyles from "../styles/common.module.scss";
 import styles from "./home.module.scss";
+import { RichText } from "prismic-dom";
 
 interface Post {
   uid?: string;
@@ -32,47 +33,47 @@ interface HomeProps {
 }
 
 export default function Home({ postsPagination }: HomeProps): ReactNode {
-
-  const { next_page } = postsPagination;
+  const { next_page, results } = postsPagination;
 
   const [posts, setPosts] = useState<Post[]>(() => {
-
-    const { results } = postsPagination;
-    
-    const formatedPosts = results.map((post) => {
-      return {
-        ...post,
-        first_publication_date: format(
-          parseISO(post.first_publication_date),
-          "d MMM yyy",
-          {
-            locale: ptBR,
-          }
-        ),
-      };
-    });
+    const formatedPosts = results;
 
     return formatedPosts;
   });
+
+  console.log(posts);
 
   const handleFetchNewPagePosts = useCallback(() => {
     fetch(next_page)
       .then((response) => response.json())
       .then((data) => {
-        data.results.map((result) => {
-          const formatedResult = {
-            ...result,
-            first_publication_date: format(
-              parseISO(result.first_publication_date),
-              "d MMM yyy",
-              {
-                locale: ptBR,
-              }
-            ),
-          };
+        data.results.map(
+          (result: {
+            uid: string;
+            first_publication_date: string;
+            data: { title: string; subtitle: any[]; author: string };
+          }) => {
+            const formatedResult = {
+              uid: result.uid,
+              first_publication_date: format(
+                parseISO(result.first_publication_date),
+                "d MMM yyy",
+                { locale: ptBR }
+              ),
+              data: {
+                title: RichText.asText(result.data.title),
+                subtitle:
+                  result.data.subtitle.find(
+                    (subtitle: { type: string }) =>
+                      subtitle.type === "paragraph"
+                  )?.text ?? "",
+                author: RichText.asText(result.data.author),
+              },
+            };
 
-          return setPosts((prevPosts) => [...prevPosts, formatedResult]);
-        });
+            return setPosts((prevPosts) => [...prevPosts, formatedResult]);
+          }
+        );
       });
   }, [next_page]);
 
@@ -88,32 +89,32 @@ export default function Home({ postsPagination }: HomeProps): ReactNode {
 
             <div className={styles.postsContainer}>
               {posts.map((post) => (
-                // <Link key={post.uid} href={`/post/${post.uid}`}>
+                <Link key={post.uid} href={`/post/${post.uid}`}>
                   <a className={styles.postContent}>
                     <header>
-                      {/* <h1>{post.data.title}</h1> */}
-                      {/* <p>{post.data.subtitle}</p> */}
+                      <h1>{post.data.title}</h1>
+                      <p>{post.data.subtitle}</p>
                     </header>
                     <footer>
                       <div>
                         <FiCalendar />
-                        {/* <time>{post.first_publication_date}</time> */}
+                        <time>{post.first_publication_date}</time>
                       </div>
                       <div>
                         <FiUser />
-                        {/* <span>{post.data.author}</span> */}
+                        <span>{post.data.author}</span>
                       </div>
                     </footer>
                   </a>
-                // </Link>
+                </Link>
               ))}
             </div>
-            
-            {/* {next_page && (
+
+            {next_page && (
               <button type="button" onClick={handleFetchNewPagePosts}>
                 Carregar mais posts
               </button>
-            )} */}
+            )}
           </section>
         </main>
       </div>
@@ -133,14 +134,20 @@ export const getStaticProps: GetStaticProps = async () => {
   );
 
   const results = postsResponse.results.map((post) => {
-    console.log(post);
     return {
       uid: post.uid,
-      first_publication_date: post.first_publication_date,
+      first_publication_date: format(
+        parseISO(post.first_publication_date),
+        "d MMM yyy",
+        { locale: ptBR }
+      ),
       data: {
-        title: post.data.title,
-        subtitle: post.data.subtitle,
-        author: post.data.author,
+        title: RichText.asText(post.data.title),
+        subtitle:
+          post.data.subtitle.find(
+            (subtitle: { type: string }) => subtitle.type === "paragraph"
+          )?.text ?? "",
+        author: RichText.asText(post.data.author),
       },
     };
   });
